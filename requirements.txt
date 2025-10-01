@@ -1,0 +1,9 @@
+qdrant-client 
+transformers 
+langchain_openai
+langchain-groq
+ipykernel
+sentence-transformers
+rank-bm25 
+pypdf
+PyPDF2
