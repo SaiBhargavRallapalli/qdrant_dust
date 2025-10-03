@@ -7,3 +7,5 @@ sentence-transformers
 rank-bm25 
 pypdf
 PyPDF2
+google-genai
+streamlit
