@@ -29,12 +29,10 @@ from collections import defaultdict
 
 
 # --- Configuration ---
-# NOTE: ASSUMES NLTK data ('stopwords', 'punkt', 'punkt_tab') was downloaded 
-# separately to avoid in-script I/O and SSL errors.
 DATA_DIR = "data"
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
-COLLECTION_NAME = "financial_reports_2025"
+COLLECTION_NAME = "financial_reports_2025_16"
 DENSE_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
@@ -46,8 +44,6 @@ PDF_FILES = {
     "ETERNAL": "eternal-ar-25.pdf",
     "INFOSYS": "infosys-ar-25.pdf",
 }
-
-# --- Utility Functions ---
 
 def clean_text(text: str) -> str:
     """Removes common PDF artifacts and extra whitespace."""
@@ -101,7 +97,7 @@ def batch_points(points_list: List[PointStruct], batch_size: int) -> Generator[L
     for i in range(0, len(points_list), batch_size):
         yield points_list[i : i + batch_size]
 
-# --- Sparse Vector (BM25-like/TF-IDF) Functions ---
+# --- Sparse Vector (TF-IDF) Functions ---
 
 DOCUMENT_FREQUENCIES: Dict[str, int] = defaultdict(int)
 TOTAL_DOCUMENTS = 0
@@ -225,14 +221,14 @@ def run_ingestion():
             "sparse_vectors": SparseVectorParams(),
         },
         # FIX: Using OptimizersConfigDiff and providing all required fields
-        optimizers_config=OptimizersConfigDiff(
-            default_segment_number=2,
-            memmap_threshold=20000,
-            indexing_threshold=10000,
-            deleted_threshold=0.2,            
-            vacuum_min_vector_number=1000,    
-            flush_interval_sec=5,             
-        )
+        # optimizers_config=OptimizersConfigDiff(
+        #     default_segment_number=2,
+        #     memmap_threshold=20000,
+        #     indexing_threshold=10000,
+        #     deleted_threshold=0.2,            
+        #     vacuum_min_vector_number=1000,    
+        #     flush_interval_sec=5,             
+        # )
     )
 
     # 6. Data Ingestion (Upsert Points)
@@ -275,12 +271,5 @@ if __name__ == "__main__":
         else:
             run_ingestion()
     except LookupError as e:
-        print("\n\n**********************************************************************")
         print("CRITICAL NLTK ERROR: NLTK resources are missing.")
-        print("Please run these commands to download the data:")
-        print(">>> import nltk")
-        print(">>> nltk.download('stopwords')")
-        print(">>> nltk.download('punkt')")
-        # Added the resource that caused the most recent LookupError
-        print(">>> nltk.download('punkt_tab')") 
-        print("**********************************************************************\n")
+  
